@@ -11,7 +11,7 @@ import java.util.Optional;
 
 
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:3000") // Allow frontend origin
 @RestController
 @RequestMapping("/courses")
 public class CourseController {
