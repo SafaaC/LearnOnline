@@ -9,7 +9,6 @@ import com.online.learning.user_service.model.User;
 import com.online.learning.user_service.service.UserService;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
