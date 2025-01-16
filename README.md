@@ -63,3 +63,71 @@ The **Online Learning Platform** is a microservices-based web application that a
 
 ## Project Structure
 
+backend/
+  ├── eureka-server/
+  │   └── src/
+  │       └── main/
+  │           └── java/
+  │               └── com/
+  │                   └── example/
+  │                       └── eureka/
+  │                           └── EurekaServerApplication.java
+  ├── api-gateway/
+  │   └── src/
+  │       └── main/
+  │           └── java/
+  │               └── com/
+  │                   └── example/
+  │                       └── gateway/
+  │                           └── ApiGatewayApplication.java
+  ├── user-service/
+  │   └── src/
+  │       └── main/
+  │           └── java/
+  │               └── com/
+  │                   └── example/
+  │                       └── userservice/
+  │                           └── UserController.java
+  │                           └── UserService.java
+  ├── course-service/
+  │   └── src/
+  │       └── main/
+  │           └── java/
+  │               └── com/
+  │                   └── example/
+  │                       └── courseservice/
+  │                           └── CourseController.java
+  │                           └── CourseService.java
+  ├── payment-service/
+  │   └── src/
+  │       └── main/
+  │           └── java/
+  │               └── com/
+  │                   └── example/
+  │                       └── paymentservice/
+  │                           └── PaymentController.java
+  │                           └── PaymentService.java
+ 
+
+online-learning-platform-frontend/
+│
+├── public/
+│   ├── index.html                # Root HTML file
+│   └── ...
+│
+├── src/
+│   ├── components/
+│   │   ├── CourseList.js         # Displays list of courses
+│   │   ├── CourseForm.js         # Form to add or update courses
+│   │   └── ...
+│   │
+│   ├── services/
+│   │   └── apiService.js         # API calls (e.g., getCourses(), addCourse())
+│   │
+│   ├── App.js                    # Main app component
+│   ├── index.js                  # React entry point (where you render the app)
+│   ├── App.css                   # Styles for the app
+│   └── ...
+│
+├── package.json                  # npm dependencies and scripts
+└── ...
