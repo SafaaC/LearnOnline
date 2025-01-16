@@ -2,6 +2,7 @@ package com.online.learning.user_service.controller;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import com.online.learning.user_service.model.User;
 import com.online.learning.user_service.service.UserService;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -17,7 +19,22 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    
+    @PostMapping("/signup")
+    public ResponseEntity<String> registerUser(@RequestBody User user) {
+        userService.saveUser(user);
+        return ResponseEntity.ok("User registered successfully");
+    }
+    @PostMapping("/login")
+public ResponseEntity<String> loginUser(@RequestBody Map<String, String> credentials) {
+    String email = credentials.get("email");
+    String password = credentials.get("password");
+
+    if (userService.authenticateUser(email, password)) {
+        return ResponseEntity.ok("Login successful");
+    } else {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+    }
+}
     // Fetch all users
     @GetMapping
     public List<User> getAllUsers() {
