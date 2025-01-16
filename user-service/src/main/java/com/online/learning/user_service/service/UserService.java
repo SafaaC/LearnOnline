@@ -15,22 +15,18 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    // Create a new user
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
-    // Get all users
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // Get a user by ID
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
-    // Delete a user by ID
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
