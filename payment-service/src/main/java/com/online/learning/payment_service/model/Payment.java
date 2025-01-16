@@ -15,20 +15,18 @@ public class Payment {
     private String paymentId;
     private String status;
     private Double amount;
-    private String currency;
     private String userId; // The ID of the user making the payment
 
-
-    public Payment(String paymentId, String status, Double amount, String currency, String userId) {
+    // Constructor with fields except currency
+    public Payment(String paymentId, String status, Double amount, String userId) {
         this.paymentId = paymentId;
         this.status = status;
         this.amount = amount;
-        this.currency = currency;
         this.userId = userId;
     }
 
-    public Payment() {
-    }
+    // Default constructor
+    public Payment() {}
 
     // Getters and Setters
     public Long getId() {
@@ -61,14 +59,6 @@ public class Payment {
 
     public void setAmount(Double amount) {
         this.amount = amount;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
     }
 
     public String getUserId() {

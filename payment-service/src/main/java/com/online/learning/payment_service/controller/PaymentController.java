@@ -1,67 +1,56 @@
 package com.online.learning.payment_service.controller;
-import com.online.learning.payment_service.model.Payment;
-import com.online.learning.payment_service.model.PaymentRequest;
+
 import com.online.learning.payment_service.service.PaymentService;
-import com.stripe.Stripe;
-import com.stripe.exception.StripeException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.param.PaymentIntentCreateParams;
-
-
+import com.online.learning.payment_service.service.PaytmService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.online.learning.payment_service.model.Payment;
+import com.online.learning.payment_service.model.PaymentRequest;
+
 @RestController
-@RequestMapping("/payments")
+@RequestMapping("/payment")
 public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
 
-    @Value("${stripe.api.key}")
-    private String stripeApiKey;
+    @Autowired
+    private PaytmService paytmService;
 
     /**
-     * Endpoint to create a payment intent and save payment details.
-     *
-     * @param paymentRequest The payment request details
-     * @return The client secret for payment confirmation
-     * @throws StripeException if there's an error creating the payment intent
+     * Initiates payment by creating a new payment request.
      */
-    @PostMapping("/create-payment-intent")
-    public String createPaymentIntent(@RequestBody PaymentRequest paymentRequest) throws StripeException {
-        // Set Stripe API key
-        Stripe.apiKey = stripeApiKey;
+    @PostMapping("/initiate")
+    public ResponseEntity<String> initiatePayment(@RequestBody PaymentRequest paymentRequest) {
+        String orderId = "ORDER_" + System.currentTimeMillis(); // Create a unique order ID
+        String amount = String.valueOf(paymentRequest.getAmount()); // Convert to string to match Paytm's expected format
 
-        // Create payment intent
-        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()
-                .setAmount(paymentRequest.getAmount())
-                .setCurrency("usd")
-                .build();
-        PaymentIntent intent = PaymentIntent.create(params);
-
-        // Save payment details
-        Payment payment = new Payment();
-        payment.setPaymentId(intent.getId());
-        payment.setStatus(intent.getStatus());
-        payment.setAmount((double) paymentRequest.getAmount());
-        payment.setCurrency("usd");
-        payment.setUserId(paymentRequest.getUserId());
+        // Create payment object and save it to the database
+        Payment payment = new Payment(orderId, "PENDING", paymentRequest.getAmount().doubleValue(), paymentRequest.getUserId());
         paymentService.savePayment(payment);
 
-        return intent.getClientSecret();
+        // Call Paytm to initiate payment process
+        String paymentUrl = paytmService.createPayment(orderId, amount);
+
+        return ResponseEntity.ok("Payment initiated. Redirect to: " + paymentUrl);
     }
 
     /**
-     * Endpoint to retrieve payment details by ID.
-     *
-     * @param id The payment ID
-     * @return Payment details
+     * Callback from Paytm to update payment status
      */
-    @GetMapping("/{id}")
-    public Payment getPaymentById(@PathVariable Long id) {
-        return paymentService.getPaymentById(id);
+    @PostMapping("/callback")
+    public ResponseEntity<String> paymentCallback(@RequestBody String paymentStatus) {
+        // Assuming the callback from Paytm will contain the order ID and status
+        String orderId = paymentStatus;  // Extract this from Paytm's response in real implementation
+        Payment payment = paymentService.getPaymentById(Long.valueOf(orderId));
+
+        // For simplicity, assume "SUCCESS" is the status received from Paytm
+        payment.setStatus("SUCCESS");  // Update payment status
+        paymentService.savePayment(payment); // Save updated payment status in the database
+
+        return ResponseEntity.ok("Payment status updated successfully");
     }
 }
