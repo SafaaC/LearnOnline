@@ -63,51 +63,83 @@ The **Online Learning Platform** is a microservices-based web application that a
 
 ## Project Structure
 
-backend/
-  ├── eureka-server/
-  │   └── src/
-  │       └── main/
-  │           └── java/
-  │               └── com/
-  │                   └── example/
-  │                       └── eureka/
-  │                           └── EurekaServerApplication.java
-  ├── api-gateway/
-  │   └── src/
-  │       └── main/
-  │           └── java/
-  │               └── com/
-  │                   └── example/
-  │                       └── gateway/
-  │                           └── ApiGatewayApplication.java
-  ├── user-service/
-  │   └── src/
-  │       └── main/
-  │           └── java/
-  │               └── com/
-  │                   └── example/
-  │                       └── userservice/
-  │                           └── UserController.java
-  │                           └── UserService.java
-  ├── course-service/
-  │   └── src/
-  │       └── main/
-  │           └── java/
-  │               └── com/
-  │                   └── example/
-  │                       └── courseservice/
-  │                           └── CourseController.java
-  │                           └── CourseService.java
-  ├── payment-service/
-  │   └── src/
-  │       └── main/
-  │           └── java/
-  │               └── com/
-  │                   └── example/
-  │                       └── paymentservice/
-  │                           └── PaymentController.java
-  │                           └── PaymentService.java
- 
+/backend
+├── /eureka-server
+│   └── /src
+│       └── /main
+│           └── /java
+│               └── /com
+│                   └── /example
+│                       └── /eureka
+│                           └── EurekaServerApplication.java
+│   └── /resources
+│       └── application.properties
+│
+├── /api-gateway
+│   └── /src
+│       └── /main
+│           └── /java
+│               └── /com
+│                   └── /example
+│                       └── /gateway
+│                           └── ApiGatewayApplication.java
+│   └── /resources
+│       └── application.properties
+│
+├── /user-service
+│   └── /src
+│       └── /main
+│           └── /java
+│               └── /com
+│                   └── /example
+│                       └── /userservice
+│                           ├── /controller
+│                           │   └── UserController.java
+│                           ├── /service
+│                           │   └── UserService.java
+│                           ├── /model
+│                           │   └── User.java
+│                           ├── /repository
+│                           │   └── UserRepository.java
+│                           └── /resources
+│                               └── application.properties
+│
+├── /course-service
+│   └── /src
+│       └── /main
+│           └── /java
+│               └── /com
+│                   └── /example
+│                       └── /courseservice
+│                           ├── /controller
+│                           │   └── CourseController.java
+│                           ├── /service
+│                           │   └── CourseService.java
+│                           ├── /model
+│                           │   └── Course.java
+│                           ├── /repository
+│                           │   └── CourseRepository.java
+│                           └── /resources
+│                               └── application.properties
+│
+├── /payment-service
+│   └── /src
+│       └── /main
+│           └── /java
+│               └── /com
+│                   └── /example
+│                       └── /paymentservice
+│                           ├── /controller
+│                           │   └── PaymentController.java
+│                           ├── /service
+│                           │   └── PaymentService.java
+│                           ├── /model
+│                           │   └── Payment.java
+│                           │   └── PaymentRequest.java
+│                           ├── /repository
+│                           │   └── PaymentRepository.java
+│                           └── /resources
+│                               └── application.properties
 
 online-learning-platform-frontend/
 │
