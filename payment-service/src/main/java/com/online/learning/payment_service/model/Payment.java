@@ -8,6 +8,9 @@ import jakarta.persistence.Id;
 @Entity
 public class Payment {
 
+    public Payment() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,9 +27,6 @@ public class Payment {
         this.amount = amount;
         this.userId = userId;
     }
-
-    // Default constructor
-    public Payment() {}
 
     // Getters and Setters
     public Long getId() {

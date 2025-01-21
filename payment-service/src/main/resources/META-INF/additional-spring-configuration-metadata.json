@@ -1,0 +1,14 @@
+{
+    "properties": [
+      {
+        "name": "razorpay.key",
+        "type": "java.lang.String",
+        "description": "Razorpay API key"
+      },
+      {
+        "name": "razorpay.secret",
+        "type": "java.lang.String",
+        "description": "Razorpay API secret"
+      }
+    ]
+  }

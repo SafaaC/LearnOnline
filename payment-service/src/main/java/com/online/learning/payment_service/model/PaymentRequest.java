@@ -10,8 +10,16 @@ public class PaymentRequest {
         return amount;
     }
 
+    public PaymentRequest() {
+    }
+
     public void setAmount(Long amount) {
         this.amount = amount;
+    }
+
+    public PaymentRequest(Long amount, String userId) {
+        this.amount = amount;
+        this.userId = userId;
     }
 
     public String getUserId() {
