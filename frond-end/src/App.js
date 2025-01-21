@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import CoursePage from './pages/CoursePage';
 import PaymentPage from './pages/PaymentPage';
@@ -11,11 +11,11 @@ const App = () => {
     <div className="App">
       <Header />
       <div className="content">
-        <Switch>
+        <Routes>
           <Route path="/" exact component={HomePage} />
           <Route path="/course/:id" component={CoursePage} />
           <Route path="/payment" component={PaymentPage} />
-        </Switch>
+        </Routes>
       </div>
       <Footer />
     </div>
