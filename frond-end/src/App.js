@@ -1,26 +1,24 @@
-import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import CoursePage from './pages/CoursePage';
-import PaymentPage from './pages/PaymentPage';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Courses from './pages/Courses';
 import Header from './components/Header';
 import Footer from './components/Footer';
+import CourseDetail from './pages/CourseDetail';
 
-const App = () => {
+function App() {
   return (
-    <div className="App">
-      <Header />
-      <div className="content">
-        <Routes>
-          <Route path="/" exact component={HomePage} />
-          <Route path="/course/:id" component={CoursePage} />
-          <Route path="/payment" component={PaymentPage} />
-        </Routes>
-      </div>
-      <Footer />
-    </div>
+    <Router>
+      <Header/>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/course/:id" element={<CourseDetail />} />
+      </Routes>
+      <Footer/>
+    </Router>
   );
-};
+}
 
 export default App;
-

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getCourses } from '../services/apiService'; // Make sure this path is correct
+import {getCourses} from '../services/ApiService';
 
 const CourseList = () => {
   const [courses, setCourses] = useState([]);

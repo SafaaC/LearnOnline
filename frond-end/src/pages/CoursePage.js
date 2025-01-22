@@ -27,4 +27,3 @@ const CoursePage = () => {
 };
 
 export default CoursePage;
-

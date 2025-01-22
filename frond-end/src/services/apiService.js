@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// API Gateway URL
-const apiUrl = 'http://localhost:8080'; // API Gateway running on port 8080
+const apiUrl = 'http://localhost:8080'; // Replace with your backend URL
 
 export const getCourses = async () => {
   try {
