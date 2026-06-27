@@ -163,3 +163,10 @@ online-learning-platform-frontend/
 │
 ├── package.json                  # npm dependencies and scripts
 └── ...
+
+
+Application	AMIs	Availability Zones	Status
+COURSE-SERVICE	n/a (1)	(1)	UP (1) - LAPTOP-8EM4T69G:course-service:8082
+GATEWAY-SERVICE	n/a (1)	(1)	UP (1) - LAPTOP-8EM4T69G:gateway-service:8080
+PAYMENT-SERVICE	n/a (1)	(1)	UP (1) - LAPTOP-8EM4T69G:payment-service:8083
+USER-SERVICE	n/a (1)	(1)	UP (1) - LAPTOP-8EM4T69G:user-service:8081
