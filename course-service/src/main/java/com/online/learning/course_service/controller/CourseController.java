@@ -35,7 +35,7 @@ public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
     }
 }
     // Add a new course
-    @PostMapping
+    @PostMapping("/admin/create")
     public Course createCourse(@RequestBody Course course) {
         return courseService.addCourse(course);
     }
@@ -53,7 +53,7 @@ public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
     }
 
     // Delete a course
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/delete/{id}")
     public ResponseEntity<Object> deleteCourse(@PathVariable Long id) {
         return courseService.getCourseById(id).map(course -> {
             courseService.deleteCourse(id);

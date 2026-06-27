@@ -1,12 +1,12 @@
 package com.online.learning.user_service.controller;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.online.learning.user_service.model.User;
+import com.online.learning.user_service.service.JwtService;
 import com.online.learning.user_service.service.UserService;
 
 import java.util.List;
@@ -19,22 +19,45 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private JwtService jwtService;
+
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         userService.saveUser(user);
         return ResponseEntity.ok("User registered successfully");
     }
-    @PostMapping("/login")
-public ResponseEntity<String> loginUser(@RequestBody Map<String, String> credentials) {
-    String email = credentials.get("email");
-    String password = credentials.get("password");
+    // @PostMapping("/login")
+    // public ResponseEntity<String> loginUser(@RequestBody Map<String, String>
+    // credentials) {
+    // String email = credentials.get("email");
+    // String password = credentials.get("password");
 
-    if (userService.authenticateUser(email, password)) {
-        return ResponseEntity.ok("Login successful");
-    } else {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+    // if (userService.authenticateUser(email, password)) {
+    // return ResponseEntity.ok("Login successful");
+    // } else {
+    // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid
+    // credentials");
+    // }
+    // }
+
+    // Admin login for authentication
+    @PostMapping("/admin/login")
+    public ResponseEntity<String> adminLogin(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+
+        // Check if admin credentials match (you can use environment variables or a
+        // secure method for storing credentials)
+        if ("admin".equals(username) && "admin_password".equals(password)) {
+            // Generate and return a JWT token
+            String token = jwtService.generateToken(username);
+            return ResponseEntity.ok(token);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
     }
-}
+
     // Fetch all users
     @GetMapping
     public List<User> getAllUsers() {

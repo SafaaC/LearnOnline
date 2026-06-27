@@ -1,24 +1,38 @@
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Courses from './pages/Courses';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import CourseDetail from './pages/CourseDetail';
+import Login from './components/Auth/Login';
+import CourseList from './components/User/CourseList';
+import CreateCourse from './components/Admin/CreateCourse';
+import ManageCourses from './components/Admin/ManageCourses';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+import Navbar from './components/Navbar';
 
-function App() {
+const App = () => {
   return (
     <Router>
-      <Header/>
+      <Navbar />
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/courses" element={<Courses />} />
-        <Route path="/course/:id" element={<CourseDetail />} />
+        <Route path="/user/courses" element={<CourseList />} />
+        <Route
+          path="/admin/create-course"
+          element={
+            <ProtectedRoute>
+              <CreateCourse />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/manage-courses"
+          element={
+            <ProtectedRoute>
+              <ManageCourses />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-      <Footer/>
     </Router>
   );
-}
+};
 
 export default App;
