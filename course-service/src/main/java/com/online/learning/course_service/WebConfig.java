@@ -9,13 +9,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    
-    @Override
-    public void addCorsMappings(@NonNull CorsRegistry registry) {
-        // Allow cross-origin requests from React app running on http://localhost:3000
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000") // Your React app URL
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
-                .allowCredentials(true); // Allow cookies and other credentials
-    }
+    // CORS is handled centrally in gateway-service.as
+    // Individual microservices should not configure CORS themselves,
+    // since requests always go through the gateway.
+    // @Override
+    // public void addCorsMappings(@NonNull CorsRegistry registry) {
+    //     // Allow cross-origin requests from React app running on http://localhost:3000
+    //     registry.addMapping("/**")
+    //             .allowedOrigins("http://localhost:3000") // Your React app URL
+    //             .allowedMethods("GET", "POST", "PUT", "DELETE")
+    //             .allowCredentials(true); // Allow cookies and other credentials
+    // }
 }
