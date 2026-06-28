@@ -37,6 +37,9 @@ export const deleteCourse = async (id) => {
 
 // Registration API
 export const registerCourse = async (id) => {
-  const response = await axios.post(`${API_BASE_URL}/courses/${id}/register`);
+  const token = getToken();
+  const response = await axios.post(`${API_BASE_URL}/courses/${id}/register`, {}, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
   return response.data;
 };
