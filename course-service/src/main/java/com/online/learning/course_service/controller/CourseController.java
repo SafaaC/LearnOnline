@@ -3,6 +3,8 @@ package com.online.learning.course_service.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
+import com.online.learning.course_service.service.RegistrationService;
 
 import com.online.learning.course_service.model.Course;
 import com.online.learning.course_service.service.CourseService;
@@ -17,6 +19,9 @@ public class CourseController {
 
     @Autowired
     private CourseService courseService;
+
+    @Autowired
+private RegistrationService registrationService;
 
     // Fetch all courses
     @GetMapping
@@ -59,4 +64,14 @@ public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
             return ResponseEntity.noContent().build();
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("/{id}/register")
+public ResponseEntity<?> registerForCourse(@PathVariable Long id, Authentication authentication) {
+    String username = authentication.getName();
+    try {
+        return ResponseEntity.ok(registrationService.registerUserForCourse(username, id));
+    } catch (IllegalStateException e) {
+        return ResponseEntity.status(409).body(e.getMessage()); // 409 Conflict
+    }
+}
 }
