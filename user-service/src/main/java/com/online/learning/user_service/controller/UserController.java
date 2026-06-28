@@ -27,19 +27,18 @@ public class UserController {
         userService.saveUser(user);
         return ResponseEntity.ok("User registered successfully");
     }
-    // @PostMapping("/login")
-    // public ResponseEntity<String> loginUser(@RequestBody Map<String, String>
-    // credentials) {
-    // String email = credentials.get("email");
-    // String password = credentials.get("password");
-
-    // if (userService.authenticateUser(email, password)) {
-    // return ResponseEntity.ok("Login successful");
-    // } else {
-    // return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid
-    // credentials");
-    // }
-    // }
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
+        
+        if (userService.authenticateUserByUsername(username, password)) {
+            String token = jwtService.generateToken(username, List.of("ROLE_USER"));
+                        return ResponseEntity.ok(Map.of("token", token));
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
 
     // Admin login for authentication
     @PostMapping("/admin/login")
@@ -51,8 +50,8 @@ public class UserController {
         // secure method for storing credentials)
         if ("admin".equals(username) && "admin_password".equals(password)) {
             // Generate and return a JWT token
-            String token = jwtService.generateToken(username);
-            return ResponseEntity.ok(token);
+            String token = jwtService.generateToken(username, List.of("ROLE_ADMIN"));
+                        return ResponseEntity.ok(token);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }

@@ -52,4 +52,12 @@ public class UserService {
         }
         return false;
     }
+        // Authenticate user by username and password
+    public boolean authenticateUserByUsername(String username, String password) {
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+        return false;
+    }
 }

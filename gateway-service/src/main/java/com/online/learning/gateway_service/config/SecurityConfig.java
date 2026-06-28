@@ -2,7 +2,7 @@ package com.online.learning.gateway_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.User;
@@ -20,8 +20,8 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeExchange(exchange -> exchange
-                .pathMatchers("/admin/**").hasRole("ADMIN")
-                .pathMatchers("/user/**", "/courses/**").permitAll()
+                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // let CORS preflight through, always
+                .pathMatchers("/users/**", "/courses/**", "/payment/**").permitAll()
                 .anyExchange().authenticated()
             )
             .httpBasic(httpBasic -> {});

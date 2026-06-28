@@ -5,8 +5,8 @@ const API_BASE_URL = "http://localhost:8080";
 
 // Authentication API
 export const login = async (credentials) => {
-  const response = await axios.post(`${API_BASE_URL}/auth/login`, credentials);
-  return response.data;
+  const response = await axios.post(`${API_BASE_URL}/users/login`, credentials);
+    return response.data;
 };
 
 // Course APIs
