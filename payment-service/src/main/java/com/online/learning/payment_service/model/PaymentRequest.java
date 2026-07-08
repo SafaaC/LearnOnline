@@ -2,31 +2,24 @@ package com.online.learning.payment_service.model;
 
 public class PaymentRequest {
 
-    private Long amount; // Amount in cents (e.g., $10.00 = 1000 cents)
-    private String userId; // ID of the user making the payment
+    private Long amount;  
+    private String userId; // username of the person paying
+    private Long courseId; // which course they're paying for
 
-    // Getters and Setters
-    public Long getAmount() {
-        return amount;
-    }
+    public PaymentRequest() {}
 
-    public PaymentRequest() {
-    }
-
-    public void setAmount(Long amount) {
-        this.amount = amount;
-    }
-
-    public PaymentRequest(Long amount, String userId) {
+    public PaymentRequest(Long amount, String userId, Long courseId) {
         this.amount = amount;
         this.userId = userId;
+        this.courseId = courseId;
     }
 
-    public String getUserId() {
-        return userId;
-    }
+    public Long getAmount() { return amount; }
+    public void setAmount(Long amount) { this.amount = amount; }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public Long getCourseId() { return courseId; }
+    public void setCourseId(Long courseId) { this.courseId = courseId; }
 }

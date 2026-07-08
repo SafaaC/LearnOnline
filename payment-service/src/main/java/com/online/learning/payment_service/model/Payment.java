@@ -8,64 +8,41 @@ import jakarta.persistence.Id;
 @Entity
 public class Payment {
 
-    public Payment() {
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String paymentId;
-    private String status;
-    private Double amount;
-    private String userId; // The ID of the user making the payment
+    private String paymentId; // Razorpay's order ID (order_ABC123)
+    private String status;    // "Pending", "Success", "Failed"
+    private Double amount;    // amount in rupees
+    private String userId;    // who paid
+    private Long courseId;    // which course they paid for
 
-    // Constructor with fields except currency
-    public Payment(String paymentId, String status, Double amount, String userId) {
+    public Payment() {}
+
+    public Payment(String paymentId, String status, Double amount, String userId, Long courseId) {
         this.paymentId = paymentId;
         this.status = status;
         this.amount = amount;
         this.userId = userId;
+        this.courseId = courseId;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getPaymentId() { return paymentId; }
+    public void setPaymentId(String paymentId) { this.paymentId = paymentId; }
 
-    public String getPaymentId() {
-        return paymentId;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setPaymentId(String paymentId) {
-        this.paymentId = paymentId;
-    }
+    public Double getAmount() { return amount; }
+    public void setAmount(Double amount) { this.amount = amount; }
 
-    public String getStatus() {
-        return status;
-    }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public Double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(Double amount) {
-        this.amount = amount;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
+    public Long getCourseId() { return courseId; }
+    public void setCourseId(Long courseId) { this.courseId = courseId; }
 }
