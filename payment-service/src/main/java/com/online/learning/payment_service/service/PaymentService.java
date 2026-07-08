@@ -18,57 +18,56 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final RazorpayClient razorpayClient;
 
-    // Constructor injection
     public PaymentService(PaymentRepository paymentRepository, RazorpayConfig razorpayConfig) throws Exception {
         this.paymentRepository = paymentRepository;
-
-        // Initialize RazorpayClient with the key and secret from RazorpayConfig
         this.razorpayClient = new RazorpayClient(razorpayConfig.getKey(), razorpayConfig.getSecret());
     }
 
-    // Method to create a payment order
     @Transactional
     public Payment createPaymentOrder(PaymentRequest paymentRequest) throws Exception {
-        // Constructing Razorpay order request
+        // Build the Razorpay order request
         JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", paymentRequest.getAmount() * 100); // Razorpay expects amount in paise
-        orderRequest.put("receipt", "receipt#001");
+        orderRequest.put("amount", paymentRequest.getAmount() * 100); // convert rupees to paise
+        orderRequest.put("currency", "INR");
+        orderRequest.put("receipt", "receipt_" + paymentRequest.getUserId() + "_" + paymentRequest.getCourseId());
 
-        // Creating order in Razorpay
+        // Store userId and courseId in Razorpay's notes field
+        // These come back in the webhook so we know who paid for what
+        JSONObject notes = new JSONObject();
+        notes.put("user_id", paymentRequest.getUserId());
+        notes.put("course_id", paymentRequest.getCourseId().toString());
+        orderRequest.put("notes", notes);
+
+        // Create the order in Razorpay
         Order order = razorpayClient.Orders.create(orderRequest);
 
-        // Storing order details in the database
+        // Save to our database as Pending
         Payment payment = new Payment();
         payment.setPaymentId(order.get("id").toString());
         payment.setStatus("Pending");
         payment.setAmount(paymentRequest.getAmount().doubleValue());
         payment.setUserId(paymentRequest.getUserId());
-        
-        // Save payment in the database
+        payment.setCourseId(paymentRequest.getCourseId());
+
         return paymentRepository.save(payment);
     }
 
-    // Fetch payment details by payment ID
     public Payment getPaymentById(Long id) {
         return paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found with ID: " + id));
     }
 
-    // Update payment status after successful payment
     public Payment updatePaymentStatus(String paymentId, String status) {
-        // Fetch payment details by payment ID
         Payment payment = paymentRepository.findByPaymentId(paymentId);
         if (payment == null) {
             throw new RuntimeException("Payment not found with ID: " + paymentId);
         }
-
-        // Update status and save changes
         payment.setStatus(status);
         return paymentRepository.save(payment);
     }
 
     @Transactional
     public Payment createPayment(Payment payment) {
-    return paymentRepository.save(payment);
-}
+        return paymentRepository.save(payment);
+    }
 }
