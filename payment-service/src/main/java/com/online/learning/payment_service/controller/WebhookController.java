@@ -22,108 +22,111 @@ public class WebhookController {
     @Autowired
     PaymentService paymentService;
 
-    private static final String WEBHOOK_SECRET = "WebHookSecrete"; // Replace with your Razorpay webhook secret
-
     @PostMapping
     public ResponseEntity<String> handleWebhook(HttpServletRequest request) {
         try {
-            // Read the request payload
+            // Read the raw request body
             StringBuilder payload = new StringBuilder();
             BufferedReader reader = request.getReader();
             String line;
             while ((line = reader.readLine()) != null) {
                 payload.append(line);
             }
-    
-            // Retrieve the Razorpay signature from headers
-            String razorpaySignature = request.getHeader("X-Razorpay-Signature");
-    
-            // For testing, skip signature validation
-            boolean isValid = true; // Skip signature validation for testing (instead of actual signature check)
-    
-            // If signature validation is enabled, you can do it like this:
-            // boolean isValid = Utils.verifyWebhookSignature(payload.toString(), razorpaySignature, WEBHOOK_SECRET);
-    
-            if (!isValid) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid webhook signature");
-            }
-    
-            // Convert the payload into a Map with type safety
+
+            // Parse the JSON body into a Map
             ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> webhookPayload = objectMapper.readValue(payload.toString(),
-                    new TypeReference<Map<String, Object>>() {});
-    
-            // Log the event or process it based on event type
+            Map<String, Object> webhookPayload = objectMapper.readValue(
+                payload.toString(),
+                new TypeReference<Map<String, Object>>() {}
+            );
+
+            // What kind of event did Razorpay send?
             String eventType = (String) webhookPayload.get("event");
             System.out.println("Received Webhook Event: " + eventType);
-    
-            // Handle different event types
-            switch (eventType) {
-                case "order.paid":
-                    handleOrderPaid(webhookPayload);
-                    break;
-                case "payment.failed":
-                    handlePaymentFailed(webhookPayload);
-                    break;
-                default:
-                    System.out.println("Unhandled Webhook Event: " + eventType);
+
+            if ("order.paid".equals(eventType)) {
+                handleOrderPaid(webhookPayload);
+            } else if ("payment.failed".equals(eventType)) {
+                handlePaymentFailed(webhookPayload);
+            } else {
+                System.out.println("Unhandled event: " + eventType);
             }
-    
+
             return ResponseEntity.ok("Webhook processed successfully");
-    
+
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing webhook");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error processing webhook");
         }
     }
+
     @SuppressWarnings("unchecked")
     private void handleOrderPaid(Map<String, Object> webhookPayload) {
-        // Example: Extract and log details
-        Map<String, Object> payload = (Map<String, Object>) webhookPayload.get("payload");
+        try {
+            // Razorpay's webhook structure:
+            // webhookPayload -> payload -> payment -> entity -> { id, amount, notes }
+            Map<String, Object> payload = (Map<String, Object>) webhookPayload.get("payload");
+            Map<String, Object> paymentWrapper = (Map<String, Object>) payload.get("payment");
+            Map<String, Object> entity = (Map<String, Object>) paymentWrapper.get("entity");
 
-        if (payload != null) {
-            Map<String, Object> paymentDetails = (Map<String, Object>) payload.get("payment");
+            if (entity == null) {
+                System.out.println("No entity found in webhook payload");
+                return;
+            }
 
-            if (paymentDetails != null) {
-                if (paymentDetails != null) {
-                    String paymentId = (String) paymentDetails.get("id");
-                    Double amount = Double.valueOf((Integer) paymentDetails.get("amount")) / 100.0; // Convert paise to rupees
-                    String userId = (String) paymentDetails.get("notes.user_id"); // Use Razorpay's "notes" field for custom data
-        
-                    // Save payment details in the database
-                    Payment payment = new Payment();
-                    payment.setPaymentId(paymentId);
-                    payment.setStatus("Success");
-                    payment.setAmount(amount);
-                    payment.setUserId(userId);
-        
-                    paymentService.createPayment(payment);
-        
-                    System.out.println("Payment details saved successfully: " + paymentId);
-                } else {
-                    System.out.println("Payment details are missing in the payload.");
-                }
-            } else {
-                System.out.println("Payload is missing in the webhook data.");
-            }}
-}
-    
+            // Extract basic payment details
+            String paymentId = (String) entity.get("id");
+            Integer amountPaise = (Integer) entity.get("amount");
+            Double amountRupees = amountPaise / 100.0;
+
+            // Extract userId and courseId from the notes field
+            // These were stored when we created the order in PaymentService
+            Map<String, Object> notes = (Map<String, Object>) entity.get("notes");
+            String userId = notes != null ? (String) notes.get("user_id") : null;
+            String courseIdStr = notes != null ? (String) notes.get("course_id") : null;
+            Long courseId = courseIdStr != null ? Long.parseLong(courseIdStr) : null;
+
+            System.out.println("Payment succeeded: " + paymentId
+                + " | User: " + userId
+                + " | Course: " + courseId
+                + " | Amount: ₹" + amountRupees);
+
+            // Save the successful payment to our database
+            Payment payment = new Payment();
+            payment.setPaymentId(paymentId);
+            payment.setStatus("Success");
+            payment.setAmount(amountRupees);
+            payment.setUserId(userId);
+            payment.setCourseId(courseId);
+            paymentService.createPayment(payment);
+
+            // TODO: call course-service to mark registration as paid
+            // This is the next step we'll implement after confirming
+            // the basic payment flow works
+            System.out.println("TODO: mark registration paid for user "
+                + userId + " course " + courseId);
+
+        } catch (Exception e) {
+            System.out.println("Error handling order.paid: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 
     @SuppressWarnings("unchecked")
     private void handlePaymentFailed(Map<String, Object> webhookPayload) {
-        // Example: Extract and log details
-        Map<String, Object> payload = (Map<String, Object>) webhookPayload.get("payload");
+        try {
+            Map<String, Object> payload = (Map<String, Object>) webhookPayload.get("payload");
+            Map<String, Object> paymentWrapper = (Map<String, Object>) payload.get("payment");
+            Map<String, Object> entity = (Map<String, Object>) paymentWrapper.get("entity");
 
-        if (payload != null) {
-            Map<String, Object> paymentDetails = (Map<String, Object>) payload.get("payment");
-
-            if (paymentDetails != null) {
-                System.out.println("Payment Failed: " + paymentDetails.get("id"));
-            } else {
-                System.out.println("Payment details are missing in the payload.");
+            if (entity != null) {
+                String paymentId = (String) entity.get("id");
+                System.out.println("Payment failed: " + paymentId);
+                // Optionally update the payment status in your DB here
             }
-        } else {
-            System.out.println("Payload is missing in the webhook data.");
+        } catch (Exception e) {
+            System.out.println("Error handling payment.failed: " + e.getMessage());
         }
     }
 }
