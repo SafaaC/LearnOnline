@@ -66,7 +66,7 @@ public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
     }
 
     @PostMapping("/{id}/register")
-public ResponseEntity<?> registerForCourse(@PathVariable Long id, Authentication authentication) {
+public ResponseEntity<?> registerForCourse(@PathVariable Long id,Authentication authentication) {
     String username = authentication.getName();
     try {
         return ResponseEntity.ok(registrationService.registerUserForCourse(username, id));

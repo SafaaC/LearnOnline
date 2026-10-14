@@ -37,10 +37,4 @@ public class PaymentController {
         return ResponseEntity.ok(payment);
     }
 
-    // Endpoint to update the payment status after a successful payment
-    @PostMapping("/update-status/{paymentId}")
-    public ResponseEntity<Payment> updatePaymentStatus(@PathVariable String paymentId, @RequestParam String status) {
-        Payment updatedPayment = paymentService.updatePaymentStatus(paymentId, status);
-        return ResponseEntity.ok(updatedPayment);
-    }
 }

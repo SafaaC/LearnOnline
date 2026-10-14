@@ -56,18 +56,24 @@ public class PaymentService {
         return paymentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Payment not found with ID: " + id));
     }
-
-    public Payment updatePaymentStatus(String paymentId, String status) {
-        Payment payment = paymentRepository.findByPaymentId(paymentId);
-        if (payment == null) {
-            throw new RuntimeException("Payment not found with ID: " + paymentId);
-        }
-        payment.setStatus(status);
-        return paymentRepository.save(payment);
-    }
-
+/** Called ONLY by the verified webhook. Safe to call twice (Razorpay retries). */
     @Transactional
-    public Payment createPayment(Payment payment) {
-        return paymentRepository.save(payment);
+public Payment markOrderPaid(String orderId) {
+    Payment payment = paymentRepository.findByPaymentId(orderId);   // paymentId holds the order id
+    if (payment == null) {
+        throw new RuntimeException("Unknown order: " + orderId);
     }
+    if (!"Success".equalsIgnoreCase(payment.getStatus())) {         // safe if Razorpay retries
+        payment.setStatus("Success");
+        payment = paymentRepository.save(payment);
+    }
+    return payment;
+}
+
+/** Called by course-service through /internal/payments/verify. */
+
+public boolean hasPaid(String userId, Long courseId) {
+    return paymentRepository
+            .existsByUserIdAndCourseIdAndStatusIgnoreCase(userId, courseId, "Success");
+}
 }

@@ -20,7 +20,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
-            .authorizeRequests()
+            .authorizeRequests() 
                 .requestMatchers(HttpMethod.GET, "/courses", "/courses/**").permitAll()
                 .requestMatchers("/courses/admin/**").hasRole("ADMIN")
                 .requestMatchers("/courses/*/register").authenticated()

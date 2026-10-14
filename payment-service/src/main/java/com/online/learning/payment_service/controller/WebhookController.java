@@ -1,132 +1,63 @@
-package com.online.learning.payment_service.controller;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.online.learning.payment_service.model.Payment;
-import com.online.learning.payment_service.service.PaymentService;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper; 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.online.learning.payment_service.service.PaymentService;
+import com.razorpay.Utils;
 
-import java.io.BufferedReader;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/payment/webhook")
 public class WebhookController {
 
-    @Autowired
-    PaymentService paymentService;
+    private static final Logger log = LoggerFactory.getLogger(WebhookController.class);
+
+    private final PaymentService paymentService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Value("${razorpay.webhook.secret}")
+    private String webhookSecret;
+
+    public WebhookController(PaymentService paymentService) {
+        this.paymentService = paymentService;
+    }
 
     @PostMapping
-    public ResponseEntity<String> handleWebhook(HttpServletRequest request) {
+    public ResponseEntity<String> handleWebhook(
+            @RequestBody String payload,                                   // raw text, not parsed
+            @RequestHeader("X-Razorpay-Signature") String signature) throws Exception {
+
+        // 1. Is this really from Razorpay?
+        boolean valid;
         try {
-            // Read the raw request body
-            StringBuilder payload = new StringBuilder();
-            BufferedReader reader = request.getReader();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                payload.append(line);
-            }
-
-            // Parse the JSON body into a Map
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> webhookPayload = objectMapper.readValue(
-                payload.toString(),
-                new TypeReference<Map<String, Object>>() {}
-            );
-
-            // What kind of event did Razorpay send?
-            String eventType = (String) webhookPayload.get("event");
-            System.out.println("Received Webhook Event: " + eventType);
-
-            if ("order.paid".equals(eventType)) {
-                handleOrderPaid(webhookPayload);
-            } else if ("payment.failed".equals(eventType)) {
-                handlePaymentFailed(webhookPayload);
-            } else {
-                System.out.println("Unhandled event: " + eventType);
-            }
-
-            return ResponseEntity.ok("Webhook processed successfully");
-
+            valid = Utils.verifyWebhookSignature(payload, signature, webhookSecret);
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error processing webhook");
+            valid = false;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    private void handleOrderPaid(Map<String, Object> webhookPayload) {
-        try {
-            // Razorpay's webhook structure:
-            // webhookPayload -> payload -> payment -> entity -> { id, amount, notes }
-            Map<String, Object> payload = (Map<String, Object>) webhookPayload.get("payload");
-            Map<String, Object> paymentWrapper = (Map<String, Object>) payload.get("payment");
-            Map<String, Object> entity = (Map<String, Object>) paymentWrapper.get("entity");
-
-            if (entity == null) {
-                System.out.println("No entity found in webhook payload");
-                return;
-            }
-
-            // Extract basic payment details
-            String paymentId = (String) entity.get("id");
-            Integer amountPaise = (Integer) entity.get("amount");
-            Double amountRupees = amountPaise / 100.0;
-
-            // Extract userId and courseId from the notes field
-            // These were stored when we created the order in PaymentService
-            Map<String, Object> notes = (Map<String, Object>) entity.get("notes");
-            String userId = notes != null ? (String) notes.get("user_id") : null;
-            String courseIdStr = notes != null ? (String) notes.get("course_id") : null;
-            Long courseId = courseIdStr != null ? Long.parseLong(courseIdStr) : null;
-
-            System.out.println("Payment succeeded: " + paymentId
-                + " | User: " + userId
-                + " | Course: " + courseId
-                + " | Amount: ₹" + amountRupees);
-
-            // Save the successful payment to our database
-            Payment payment = new Payment();
-            payment.setPaymentId(paymentId);
-            payment.setStatus("Success");
-            payment.setAmount(amountRupees);
-            payment.setUserId(userId);
-            payment.setCourseId(courseId);
-            paymentService.createPayment(payment);
-
-            // TODO: call course-service to mark registration as paid
-            // This is the next step we'll implement after confirming
-            // the basic payment flow works
-            System.out.println("TODO: mark registration paid for user "
-                + userId + " course " + courseId);
-
-        } catch (Exception e) {
-            System.out.println("Error handling order.paid: " + e.getMessage());
-            e.printStackTrace();
+        if (!valid) {
+            log.warn("Webhook rejected: bad signature");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid signature");
         }
-    }
 
-    @SuppressWarnings("unchecked")
-    private void handlePaymentFailed(Map<String, Object> webhookPayload) {
-        try {
-            Map<String, Object> payload = (Map<String, Object>) webhookPayload.get("payload");
-            Map<String, Object> paymentWrapper = (Map<String, Object>) payload.get("payment");
-            Map<String, Object> entity = (Map<String, Object>) paymentWrapper.get("entity");
+        // 2. Now it's safe to read
+        JsonNode root = objectMapper.readTree(payload);
+        String event = root.path("event").asText();
 
-            if (entity != null) {
-                String paymentId = (String) entity.get("id");
-                System.out.println("Payment failed: " + paymentId);
-                // Optionally update the payment status in your DB here
-            }
-        } catch (Exception e) {
-            System.out.println("Error handling payment.failed: " + e.getMessage());
+        if ("order.paid".equals(event)) {
+            String orderId = root.path("payload").path("payment").path("entity").path("order_id").asText();
+            paymentService.markOrderPaid(orderId);       // exception → 500 → Razorpay retries
+            log.info("Order {} marked as paid", orderId);
+        } else {
+            log.info("Ignored webhook event {}", event);
         }
+        return ResponseEntity.ok("OK");
     }
 }

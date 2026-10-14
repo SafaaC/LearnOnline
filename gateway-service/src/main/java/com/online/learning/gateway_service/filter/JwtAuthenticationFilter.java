@@ -12,11 +12,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 @WebFilter
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String secretKey = "your-secret-key";  // Secure this key
+
+    private static final List<String> PUBLIC_PATHS = List.of(
+       "/users/admin/login", "/users/login","/users/signup", "/users/register", "/payment/webhook");
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
