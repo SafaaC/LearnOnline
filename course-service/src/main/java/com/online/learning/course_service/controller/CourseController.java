@@ -65,13 +65,4 @@ public ResponseEntity<Course> getCourseById(@PathVariable Long id) {
         }).orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/{id}/register")
-public ResponseEntity<?> registerForCourse(@PathVariable Long id,Authentication authentication) {
-    String username = authentication.getName();
-    try {
-        return ResponseEntity.ok(registrationService.registerUserForCourse(username, id));
-    } catch (IllegalStateException e) {
-        return ResponseEntity.status(409).body(e.getMessage()); // 409 Conflict
-    }
-}
 }

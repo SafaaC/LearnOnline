@@ -1,4 +1,4 @@
-package com.online.learning.course_service.model;
+package com.online.learning.registration_service.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

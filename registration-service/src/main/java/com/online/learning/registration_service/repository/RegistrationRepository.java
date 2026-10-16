@@ -1,6 +1,6 @@
-package com.online.learning.course_service.repository;
+package com.online.learning.registration_service.repository;
 
-import com.online.learning.course_service.model.Registration;
+import com.online.learning.registration_service.model.Registration;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RegistrationRepository extends JpaRepository<Registration, Long> {
