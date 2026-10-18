@@ -17,6 +17,7 @@ public class EmailService {
 
     public void sendWelcome(String toEmail, String username, Long courseId) {
         SimpleMailMessage msg = new SimpleMailMessage();
+        msg.setFrom(fromAddress);   
         msg.setTo(toEmail);
         msg.setSubject("Welcome to the course!");
         msg.setText("Hi " + username + ", you are registered for course " + courseId + ".");
