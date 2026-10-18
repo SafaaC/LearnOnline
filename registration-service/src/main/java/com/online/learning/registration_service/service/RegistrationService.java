@@ -8,13 +8,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import com.online.learning.registration_service.event.RegistrationConfirmedEvent;   
+import org.springframework.kafka.core.KafkaTemplate;                                
+
 
 @Service
 public class RegistrationService {
 
-    @Autowired private RegistrationRepository registrationRepository;
-    @Autowired private CourseClient courseClient;
-    @Autowired private PaymentClient paymentClient;
+    @Autowired private 
+    RegistrationRepository registrationRepository;
+    
+    @Autowired 
+    private CourseClient courseClient;
+
+    @Autowired 
+    private PaymentClient paymentClient;
+
+     @Autowired                                                                      
+    private KafkaTemplate<String, RegistrationConfirmedEvent> kafkaTemplate;
 
     public Registration registerUserForCourse(String username, Long courseId) {
 
@@ -27,7 +38,7 @@ public class RegistrationService {
         } catch (FeignException e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Course service unavailable");
         }
-
+        // already registered?
         if (registrationRepository.existsByUsernameAndCourseId(username, courseId)) {
             throw new IllegalStateException("User already registered for this course");
         }
@@ -44,7 +55,27 @@ public class RegistrationService {
                 throw new IllegalStateException("Payment not completed for this course");
             }
         }
+        // save
+         Registration saved =  registrationRepository.save(new Registration(username, courseId));
+         return saved;
 
-        return registrationRepository.save(new Registration(username, courseId));
+         // announce it on Kafka (the part you pasted)
+        try {
+            kafkaTemplate.send("registration-events", username,
+                    new RegistrationConfirmedEvent(username, courseId))
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        System.out.println("Event NOT published: " + ex.getMessage());
+                    } else {
+                        System.out.println("Event published to partition "
+                            + result.getRecordMetadata().partition()
+                            + " offset " + result.getRecordMetadata().offset());
+                    }
+                });
+        } catch (Exception e) {
+            System.out.println("Could not publish event: " + e.getMessage());
+        }
+
+        return saved;
     }
 }
