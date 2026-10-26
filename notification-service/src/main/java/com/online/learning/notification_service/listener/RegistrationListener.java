@@ -3,6 +3,11 @@ package com.online.learning.notification_service.listener;
 import com.online.learning.notification_service.event.RegistrationConfirmedEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory; 
+import com.online.learning.notification_service.client.UserClient;
+import com.online.learning.notification_service.service.EmailService;
+import feign.FeignException;
 
 @Component
 public class RegistrationListener {

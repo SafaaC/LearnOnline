@@ -8,7 +8,8 @@ import com.online.learning.course_service.service.RegistrationService;
 
 import com.online.learning.course_service.model.Course;
 import com.online.learning.course_service.service.CourseService;
-
+import com.online.learning.course_service.model.Registration;
+import com.online.learning.course_service.service.RegistrationService;
 import java.util.Optional;
 
 
