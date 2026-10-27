@@ -57,8 +57,7 @@ public class RegistrationService {
         }
         // save
          Registration saved =  registrationRepository.save(new Registration(username, courseId));
-         return saved;
-
+         
          // announce it on Kafka (the part you pasted)
         try {
             kafkaTemplate.send("registration-events", username,
