@@ -21,7 +21,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeExchange(exchange -> exchange
                 .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // let CORS preflight through, always
-                .pathMatchers("/users/**", "/courses/**", "/payment/**").permitAll()
+                .pathMatchers("/users/**", "/courses/**", "/payment/**",  "/registrations/**").permitAll()
                 .anyExchange().authenticated()
             )
             .httpBasic(httpBasic -> {});
