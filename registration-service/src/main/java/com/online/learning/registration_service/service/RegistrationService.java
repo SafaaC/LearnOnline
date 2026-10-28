@@ -42,10 +42,9 @@ public class RegistrationService {
         if (registrationRepository.existsByUsernameAndCourseId(username, courseId)) {
             throw new IllegalStateException("User already registered for this course");
         }
-
+        boolean paid = false;
         // Call 2: paid course? ask payment-service
         if (course.price() != null && course.price() > 0) {
-            boolean paid;
             try {
                 paid = paymentClient.verify(username, courseId);
             } catch (FeignException e) {
