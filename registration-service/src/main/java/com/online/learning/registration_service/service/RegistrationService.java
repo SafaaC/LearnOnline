@@ -57,7 +57,7 @@ public class RegistrationService {
         }
         // save
          Registration registration = new Registration(username, courseId);
-         registration.setPaid(paidCourse);       
+         registration.setPaid(paid);       
          Registration saved = registrationRepository.save(registration);
          // announce it on Kafka (the part you pasted)
         try {
